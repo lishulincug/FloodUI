@@ -2,13 +2,15 @@ import React from 'react';
 import { Layout, Button, Table } from 'antd';
 import { Map, Markers, InfoWindow } from 'react-amap';
 import fetch from 'dva/fetch';
-import history from '../services/history';
-import { routerRedux } from 'dva/router';
+import PropTypes from 'prop-types';
 
 const { Sider, Content } = Layout;
 const { Column } = Table;
 
 export class SelectSensorComponent extends React.Component {
+  static contextTypes = {
+    router: PropTypes.object,
+  }
   state = {
     sensors: null,
     markers: {
@@ -23,8 +25,8 @@ export class SelectSensorComponent extends React.Component {
     center: { longtitude: 120, latitude: 30 },
   }
 
-  constructor() {
-    super();
+  constructor(props, context) {
+    super(props, context);
     const _this = this;
     // 随机生成 10 个标记点的原始数据
     this.markers = null;
@@ -106,7 +108,7 @@ export class SelectSensorComponent extends React.Component {
     ).then((data) => {
       // this.props.history.push('/subscribe');
       // if (data)
-      data ? window.location.href = '/subscribe' : alert('数据集选取错误！');
+      data ? this.context.router.history.push('/subscribe') : alert('数据集选取错误！');
     }).catch((error) => {
       throw error;
     });
