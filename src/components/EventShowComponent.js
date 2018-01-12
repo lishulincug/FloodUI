@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Icon, Layout, Button, Tabs, Table, Tree } from 'antd';
+import { Row, Col, Icon, Layout, Button, Tabs, Table, Tree,Card } from 'antd';
 import { Map, Markers, InfoWindow } from 'react-amap';
 import fetch from 'dva/fetch';
 
@@ -492,7 +492,44 @@ export class EventShowComponent extends React.Component {
               </Layout>
             </TabPane>
             <TabPane tab={<span><Icon type="bank" />洪涝事件过程信息模型</span>} key="3">
-              Tab 2
+              {this.state.floodResult==null?<div>无洪涝事件模型参数</div>: <div style={{ background: '#ECECEC'}}>
+                <Row gutter={16}>
+
+                  <Col span={6}>
+                    <Card title="1.诊断阶段参数" bordered={false}>
+                      <h4><b>传感器名称：</b>{this.state.floodResult.dataset.diagnosisSensor.sensorName}</h4>
+                      <h4><b>传感器属性：</b>{this.state.floodResult.dataset.diagnosisProperty.propertyName}</h4>
+                      <h4><b>阈值：</b>{this.state.floodResult.params.diagnosisThreshold}{this.state.floodResult.params.diagnosisUnit}</h4>
+                      <h4><b>重复次数：</b>{this.state.floodResult.params.diagnosisRepeatTimes}次</h4>
+                    </Card>
+                  </Col>
+                  <Col span={6}>
+                    <Card title="2.准备阶段参数" bordered={false}>
+                      <h4><b>传感器名称：</b>{this.state.floodResult.dataset.prepareSensor.sensorName}</h4>
+                      <h4><b>传感器属性：</b>{this.state.floodResult.dataset.prepareProperty.propertyName}</h4>
+                      <h4><b>阈值：</b>{this.state.floodResult.params.prepareThreshold}{this.state.floodResult.params.prepareUnit}</h4>
+                      <h4><b>重复次数：</b>{this.state.floodResult.params.prepareRepeatTimes}次</h4>
+                    </Card>
+                  </Col>
+                  <Col span={6}>
+                    <Card title="3.响应阶段参数" bordered={false}>
+                      <h4><b>传感器名称：</b>{this.state.floodResult.dataset.responseSensor.sensorName}</h4>
+                      <h4><b>传感器属性：</b>{this.state.floodResult.dataset.responseProperty.propertyName}</h4>
+                      <h4><b>阈值：</b>{this.state.floodResult.params.responseThreshold}{this.state.floodResult.params.responseUnit}</h4>
+                      <h4><b>重复次数：</b>{this.state.floodResult.params.responseRepeatTimes}次</h4>
+                    </Card>
+                  </Col>
+                  <Col span={6}>
+                    <Card title="4.恢复阶段参数" bordered={false}>
+                      <h4><b>传感器名称：</b>{this.state.floodResult.dataset.recoverySensor.sensorName}</h4>
+                      <h4><b>传感器属性：</b>{this.state.floodResult.dataset.recoveryProperty.propertyName}</h4>
+                      <h4><b>阈值：</b>{this.state.floodResult.params.recoveryThreshold}{this.state.floodResult.params.recoveryUnit}</h4>
+                      <h4><b>重复次数：</b>{this.state.floodResult.params.recoveryRepeatTimes}次</h4>
+                    </Card>
+                  </Col>
+                </Row>
+              </div>}
+
             </TabPane>
           </Tabs>
         </Layout>
