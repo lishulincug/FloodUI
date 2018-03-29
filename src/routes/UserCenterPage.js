@@ -56,8 +56,8 @@ export default class UserCenterPage extends React.Component {
             {/* <Menu.Item key="5"><a onClick={this.sendData}>首页1</a></Menu.Item>*/}
             <Menu.Item key="0"><Link to="/">首页</Link></Menu.Item>
             <Menu.Item key="1"><Link to="/access">传感器观测接入</Link></Menu.Item>
-            <Menu.Item key="2"><Link to={path}>洪涝事件订阅</Link></Menu.Item>
-            <Menu.Item key="3"><Link to="/evaluate">洪涝灾害评估</Link></Menu.Item>
+            <Menu.Item key="2"><Link to="/subscribe">洪涝事件订阅</Link></Menu.Item>
+            <Menu.Item key="3"><Link to="/evaluate">洪涝事件管理</Link></Menu.Item>
             <Menu.Item key="4" style={{ float: 'right' }}>登录</Menu.Item>
           </Menu>
         </Header>

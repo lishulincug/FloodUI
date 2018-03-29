@@ -10,6 +10,7 @@ import EvaluateDisasterPage from './routes/EvaluateDisasterPage';
 import TabsPage from './routes/TabTestPage';
 import LoginPage from './routes/LoginPage';
 import SelectSensorPage from './routes/SelectSensorPage';
+import SelectSensorPropertyPage from './routes/SelectSensorPropertyPage'
 
 function RouterConfig({ history }) {
   return (
@@ -26,6 +27,7 @@ function RouterConfig({ history }) {
         <Route path="/tab" exact component={TabsPage} />
         <Route path="/login" exact component={LoginPage} />
         <Route path="/sensor" exact component={SelectSensorPage} />
+        <Route path="/property" exact component={SelectSensorPropertyPage} />
         <Route path="/*" exact component={NoMatchPage} />
       </Switch>
       </div>

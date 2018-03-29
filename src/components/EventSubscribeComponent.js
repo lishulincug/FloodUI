@@ -1,5 +1,5 @@
 import React from 'react';
-import { Steps, Button, message, Input, Table } from 'antd';
+import { Steps, Button, message,Row,Col, Input, Table } from 'antd';
 import styles from './EventSubscribeComponent.css';
 import { Link } from 'dva/router';
 import fetch from 'dva/fetch';
@@ -65,7 +65,7 @@ export class EventSubscribeComponent extends React.Component {
           <div>
             <h2 style={{ 'text-align': 'center' }}>已选择的传感器数据表</h2>
             <br />
-            <Table dataSource={sensorData}>
+            <Table dataSource={sensorData} pagination={{ defaultPageSize: 3 }}>
               <Column dataIndex="sensorID" title="传感器ID" />
               <Column dataIndex="sensorName" title="传感器名称" />
             </Table>
@@ -86,8 +86,37 @@ export class EventSubscribeComponent extends React.Component {
       }
     }
     if (this.state.current == 2) {
-      return (<div>设置邮箱：<Input style={{ width: '30%' }} placeholder="设置事件监听邮箱" value={this.state.email} onChange={this.changeEmail} />
-      添加事件用户自定义名称：<Input style={{ width: '30%' }} placeholder="设置事件别名" value={this.state.eventOtherName} onChange={this.changeEventName} /></div>);
+      if(!this.state.stepsStatus.service.flag) {
+        return (<div><Row>
+          <Col span={4}>1.设置邮箱:</Col>
+          <Col span={5}><Input style={{width: '100%'}} placeholder="设置事件监听邮箱" value={this.state.email} onChange={this.changeEmail}/></Col>
+          <Col span={2}/>
+          <Col span={4}>2.添加事件用户自定义名称：</Col>
+          <Col span={5}> <Input style={{width: '100%'}} placeholder="设置事件别名" value={this.state.eventOtherName}
+                                onChange={this.changeEventName}/></Col>
+        </Row>
+          <br/>
+          <Row>
+            <Col span={4}>3.选择水位预测观测属性：</Col>
+            <Col span={5}><Button type={'primary'} style={{width: '100%'}}><Link to="/property">属性选择界面</Link></Button></Col>
+          </Row>
+        </div>);
+      }else {
+        return<div><Row>
+          <Col span={4}>1.设置邮箱:</Col>
+          <Col span={5}><Input style={{width: '100%'}} placeholder="设置事件监听邮箱" value={this.state.email} onChange={this.changeEmail}/></Col>
+          <Col span={2}/>
+          <Col span={4}>2.添加事件用户自定义名称：</Col>
+          <Col span={5}> <Input style={{width: '100%'}} placeholder="设置事件别名" value={this.state.eventOtherName}
+                                onChange={this.changeEventName}/></Col>
+        </Row>
+          <br/>
+          <Table dataSource={this.state.stepsStatus.service.selectedProperty} pagination={{ defaultPageSize: 3 }}>
+            <Column dataIndex="sensorID" title="传感器ID" />
+            <Column dataIndex="sensorName" title="传感器名称" />
+          </Table>
+        </div>
+      }
     }
   }
   // 以Session作为状态存储的对象
@@ -102,10 +131,17 @@ export class EventSubscribeComponent extends React.Component {
   submitEvent() {
     if (this.state.stepsStatus == null || !this.state.stepsStatus.dataset.flag || !this.state.stepsStatus.event.flag) alert('不行');
     // 上传配置参数数据，以及用户定义别名及邮箱
+    var propertys = this.state.stepsStatus.service.selectedProperty;
+    var propertyIDs = new Array();
+    for (var i=0;i<propertys.length;i++) {
+      propertyIDs.push(propertys[i].id);
+    }
     const subcribeParams = this.state.stepsStatus.event.params;
+    subcribeParams.sensorPropertyIDs = propertyIDs;
     subcribeParams.userDefineName = this.state.eventOtherName;
     subcribeParams.name=this.state.eventOtherName;
     subcribeParams.email = this.state.email;
+
      alert(JSON.stringify(subcribeParams));
     fetch('http://www.myflood.com/subscribeWithSession', { method: 'POST',
       credentials: 'include',
@@ -135,9 +171,21 @@ export class EventSubscribeComponent extends React.Component {
       title: '构建过程信息订阅模型',
       content: <div>进入选择洪涝事件过程信息模型参数设置页面：<Button type={'primary'}><a href="http://www.myflood.com/simpleSubscribeEvnt">进入参数设置页面</a></Button></div>,
     }, {
-      title: '设置接收地址（邮箱）',
-      content: <div>设置邮箱：<Input style={{ width: '30%' }} placeholder="设置事件监听邮箱" value={this.state.email} onChange={this.changeEmail} />
-        添加事件用户自定义名称：<Input style={{ width: '30%' }} placeholder="设置事件别名" value={this.state.eventOtherName} onChange={this.changeEventName} /></div>,
+      title: '设置服务配置参数',
+      content: <div><Row>
+        <Col span={4}>1.设置邮箱:</Col>
+        <Col span={5}><Input style={{width: '100%'}} placeholder="设置事件监听邮箱" value={this.state.email} onChange={this.changeEmail}/></Col>
+        <Col span={2}/>
+        <Col span={4}>2.添加事件用户自定义名称：</Col>
+        <Col span={5}> <Input style={{width: '100%'}} placeholder="设置事件别名" value={this.state.eventOtherName}
+                              onChange={this.changeEventName}/></Col>
+        </Row>
+        <br/>
+        <Row>
+          <Col span={4}>3.选择水位预测观测属性：</Col>
+          <Col span={5}><Button type={'primary'} style={{width: '100%'}}><Link to="/property">属性选择界面</Link></Button></Col>
+        </Row>
+      </div>,
     }];
     const { current } = this.state;
     return (
