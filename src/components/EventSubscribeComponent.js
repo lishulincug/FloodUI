@@ -65,7 +65,7 @@ export class EventSubscribeComponent extends React.Component {
           <div>
             <h2 style={{ 'text-align': 'center' }}>已选择的传感器数据表</h2>
             <br />
-            <Table dataSource={sensorData} pagination={{ defaultPageSize: 3 }}>
+            <Table dataSource={sensorData} pagination={{ defaultPageSize: 10 }}>
               <Column dataIndex="sensorID" title="传感器ID" />
               <Column dataIndex="sensorName" title="传感器名称" />
             </Table>
@@ -102,20 +102,23 @@ export class EventSubscribeComponent extends React.Component {
           </Row>
         </div>);
       }else {
-        return<div><Row>
+        return <div><Row>
           <Col span={4}>1.设置邮箱:</Col>
-          <Col span={5}><Input style={{width: '100%'}} placeholder="设置事件监听邮箱" value={this.state.email} onChange={this.changeEmail}/></Col>
+          <Col span={5}><Input style={{width: '100%'}} placeholder="设置事件监听邮箱" value={this.state.email}
+                               onChange={this.changeEmail}/></Col>
           <Col span={2}/>
           <Col span={4}>2.添加事件用户自定义名称：</Col>
           <Col span={5}> <Input style={{width: '100%'}} placeholder="设置事件别名" value={this.state.eventOtherName}
                                 onChange={this.changeEventName}/></Col>
         </Row>
           <br/>
-          <Table dataSource={this.state.stepsStatus.service.selectedProperty} pagination={{ defaultPageSize: 3 }}>
-            <Column dataIndex="sensorID" title="传感器ID" />
-            <Column dataIndex="sensorName" title="传感器名称" />
+          <Table dataSource={this.state.stepsStatus.service.selectedProperty} pagination={{defaultPageSize: 10}}>
+            <Column dataIndex="sensorID" title="传感器ID"/>
+            <Column dataIndex="sensorName" title="传感器名称"/>
+            <Column dataIndex="observedPropertyID" title="传感器属性ID"/>
+            <Column dataIndex="propertyName" title="传感器属性名称"/>
           </Table>
-        </div>
+        </div>;
       }
     }
   }

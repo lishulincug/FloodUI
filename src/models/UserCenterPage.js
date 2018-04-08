@@ -54,7 +54,7 @@ export default class UserCenterPage extends React.Component {
           </Menu>
         </Header>
         <Layout>
-          <Content style={{ margin: '12px 0px 0px 12px', padding: 0, background: '#fff', minHeight: 410 }}>
+          <Content style={{ margin: '12px 0px 0px 12px', padding: 0, background: '#fff', minHeight: 1000 }}>
             <div style={{ width: '100%', height: '100%' }}>
               <Map amapkey={'788e08def03f95c670944fe2c78fa76f'} />
             </div>

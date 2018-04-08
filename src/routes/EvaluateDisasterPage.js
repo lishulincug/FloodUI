@@ -52,7 +52,7 @@ export default class EventSubscribeMangerPage extends React.Component {
           </Menu>
         </Header>
         <Layout>
-          <Content style={{ margin: '12px 0px 0px 12px', padding: 0, background: '#fff', minHeight: 410 }}>
+          <Content style={{ margin: '12px 0px 0px 12px', padding: 0, background: '#fff', minHeight: 1000 }}>
             {/* {alert(this.state.users[0])}*/}
             <EvaluateDisasterComponent />
           </Content>

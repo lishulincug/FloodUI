@@ -1,49 +1,75 @@
 import React from 'react';
-import { Tabs, Icon, Layout } from 'antd';
+import { Tabs, Icon, Layout,Table, Button } from 'antd';
 import { ChartComponent } from './ChartComponent';
 import { TableComponent } from './TableComponent';
 import { MapComponent } from './MapComponent';
 
 const { Sider, Content } = Layout;
 const TabPane = Tabs.TabPane;
-export class TabComponent extends React.Component {
-  render() {
-    return (
-      <Tabs defaultActiveKey="2" style={{ height: 400 }}>
-        <TabPane tab={<span><Icon type="global" />洪涝事件传感器分布图</span>} key="1">
-          <Layout>
-            <Content style={{ minHeight: 410 }}>
-              <div style={{ height: '400px',width:'80%' }}>
-                <MapComponent />
-              </div>
+const columns = [{
+  title: 'Name',
+  dataIndex: 'name',
+}, {
+  title: 'Age',
+  dataIndex: 'age',
+}, {
+  title: 'Address',
+  dataIndex: 'address',
+}];
 
-            </Content>
-          </Layout>
-        </TabPane>
-        <TabPane tab={<span><Icon type="area-chart" />洪涝事件主动服务</span>} key="2">
-          <Layout>
-            <Sider
-              trigger={null}
-              width={200}
-              style={{ backgroundColor: 'white' }}
-            >
-              <TableComponent />
-            </Sider>
-            <Icon type="area-chart" />
-            <Content style={{ minHeight: 410 }}>
-              <div style={{ height: '400px', width: '95%' }}>
-                <ChartComponent />
-              </div>
-            </Content>
-            <Sider width={100}>
-              <div>主动服务</div>
-            </Sider>
-          </Layout>
-        </TabPane>
-        <TabPane tab={<span><Icon type="bank" />洪涝事件过程信息模型</span>} key="3">
-        Tab 2
-      </TabPane>
-      </Tabs>
+const data = [];
+for (let i = 0; i < 46; i++) {
+  data.push({
+    key: i,
+    name: `Edward King ${i}`,
+    age: 32,
+    address: `London, Park Lane no. ${i}`,
+  });
+}
+
+export class TabComponent extends React.Component {
+  state = {
+    selectedRowKeys: [], // Check here to configure the default column
+    loading: false,
+  };
+  start = () => {
+    this.setState({ loading: true });
+    // ajax request after empty completing
+    setTimeout(() => {
+      this.setState({
+        selectedRowKeys: [],
+        loading: false,
+      });
+    }, 1000);
+  }
+  onSelectChange = (selectedRowKeys) => {
+    console.log('selectedRowKeys changed: ', selectedRowKeys);
+    this.setState({ selectedRowKeys });
+  }
+  render() {
+    const { loading, selectedRowKeys } = this.state;
+    const rowSelection = {
+      selectedRowKeys,
+      onChange: this.onSelectChange,
+    };
+    const hasSelected = selectedRowKeys.length > 0;
+    return (
+      <div>
+        <div style={{ marginBottom: 16 }}>
+          <Button
+            type="primary"
+            onClick={this.start}
+            disabled={!hasSelected}
+            loading={loading}
+          >
+            Reload
+          </Button>
+          <span style={{ marginLeft: 8 }}>
+            {hasSelected ? `Selected ${selectedRowKeys.length} items` : ''}
+          </span>
+        </div>
+        <Table  pagination={{ defaultPageSize: 6 }} rowSelection={rowSelection} columns={columns} dataSource={data} />
+      </div>
     );
   }
 }

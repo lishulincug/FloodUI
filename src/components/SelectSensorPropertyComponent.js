@@ -6,16 +6,13 @@ import PropTypes from 'prop-types';
 
 const { Sider, Content } = Layout;
 const { Column } = Table;
-const columns = [{
-  title: "传感器名称",
-  dataIndex: "sensorName"
-}];
 
-export class SelectSensorComponent extends React.Component {
+export class SelectSensorPropertyComponent extends React.Component {
   static contextTypes = {
     router: PropTypes.object,
   }
   state = {
+    selectedRows: null,
     sensors: null,
     markers: {
       position: {
@@ -61,11 +58,29 @@ export class SelectSensorComponent extends React.Component {
       }
     },
     ).then((data) => {
-      for(var i=0;i<data.length;i++) {
-        data[i].key=i;
+      // 构建Sensor_property的table
+      if (data == null) return;
+      const properys = new Array();
+      var count=0;
+      for (let i = 0; i < data.length; i++) {
+        const obs = data[i].observedProperties;
+        for (let j = 0; j < obs.length; j++) {
+          const oneProperty = {};
+          oneProperty.key = count;
+          oneProperty.sensorID = data[i].sensorID;
+          oneProperty.sensorName = data[i].sensorName;
+          oneProperty.lat = data[i].lat;
+          oneProperty.lon = data[i].lon;
+          oneProperty.propertyID = obs[j].propertyID;
+          oneProperty.propertyName = obs[j].propertyName;
+          oneProperty.unit = obs[j].unit;
+          properys.push(oneProperty);
+          count++;
+        }
       }
+
       this.setState({
-        sensors: data,
+        sensors: properys,
       });
     }).catch((error) => {
       throw error;
@@ -73,37 +88,45 @@ export class SelectSensorComponent extends React.Component {
   }
 
 
-  onSelectChange = (selectedRowKeys) => {
+  // onSelectTable=(record, selected, selectedRows) => {
+  //   if (selected) {
+  //     this.setState(
+  //       { selectedRows:selectedRows,
+  //         center: { longitude: record.lon, latitude: record.lat } });
+  //   }
+  // }
+
+  onSelectChange = (selectedRowKeys,selectedRows) => {
     if (selectedRowKeys.length > 0) {
       const key = parseInt(selectedRowKeys[selectedRowKeys.length - 1]);
       this.setState({
         selectedRowKeys,
+        selectedRows,
         center: { longitude: this.state.sensors[key].lon, latitude: this.state.sensors[key].lat },
       });
     } else {
-      this.setState({ selectedRowKeys });
+      this.setState({ selectedRowKeys,selectedRows });
     }
   }
   // 上传选中的传感器ID
   onClickFinish = () => {
-    if (this.state.selectedRowKeys.length == 0) { alert('请先选择传感器，再完成数据集'); return; }
-    // let s = '';
-    const sensorIds = new Array();
-    for (let i = 0; i < this.state.selectedRowKeys.length; i++) {
-      const key = parseInt(this.state.selectedRowKeys[i]);
-      sensorIds.push(this.state.sensors[key].sensorID);
-      // if (i == this.state.selectedRowKeys.length - 1) { s = `${s}sensorIDs=${this.state.sensors[key].sensorID}`; } else { s = `${s}sensorIDs=${this.state.sensors[key].sensorID}&`; }
+    alert()
+    if (this.state.selectedRows==null||this.state.selectedRows.length == 0) { alert('请先选择传感器，再完成数据集'); return; }
+    var propertys = new Array();
+    for (var i=0;i<this.state.selectedRows.length;i++) {
+      var oneProperty = {};
+      oneProperty.sensorID = this.state.selectedRows[i].sensorID;
+      oneProperty.observedPropertyID = this.state.selectedRows[i].propertyID;
+      propertys.push(oneProperty);
     }
-    // const formData = new FormData();
-    // formData.append('sensorIDs', sensorIds);
-    fetch('http://www.myflood.com/getSelectSensorsJson', { method: 'POST',
+    fetch('http://www.myflood.com/getSelectPropertiesJson', { method: 'POST',
       credentials: 'include',
       headers:
       { Accept: 'application/json',
-        // 'Access-Control-Allow-Origin': 'http://127.0.0.1',
-        // 'Access-Control-Allow-Credentials': 'true',
+          // 'Access-Control-Allow-Origin': 'http://127.0.0.1',
+          // 'Access-Control-Allow-Credentials': 'true',
         'Content-Type': 'application/json; charset=utf-8' },
-      body: JSON.stringify(sensorIds) }).then((response) => {
+      body: JSON.stringify(propertys) }).then((response) => {
         if (response.status >= 200 && response.status < 300) {
           return response.json();
         } else {
@@ -115,27 +138,39 @@ export class SelectSensorComponent extends React.Component {
     ).then((data) => {
       // this.props.history.push('/subscribe');
       // if (data)
-      data ? this.context.router.history.push('/subscribe') : alert('数据集选取错误！');
+      data.flag ? this.context.router.history.push('/subscribe') : alert(data.message);
     }).catch((error) => {
       throw error;
     });
   }
 
   render() {
-    const { selectedRowKeys } = this.state;
+    const { selectedRowKeys, selectedRows } = this.state;
     const rowSelection = {
       selectedRowKeys,
+      selectedRows,
       onChange: this.onSelectChange,
+      // onSelect: this.onSelectTable,
     };
     return (
       <Layout>
         <Sider
           trigger={null}
-          width={200}
+          width={400}
           style={{ backgroundColor: 'white' }}
         >
           <Table
-            pagination={{ defaultPageSize: 6 }}  columns={columns} rowSelection={rowSelection} dataSource={this.state.sensors}>
+            dataSource={this.state.sensors} pagination={{ defaultPageSize: 6 }} rowSelection={rowSelection}>
+            <Column
+              title="传感器名称"
+              dataIndex="sensorName"
+              // key="sensorName"
+            />
+            <Column
+              title="属性名称"
+              dataIndex="propertyName"
+              // key="propertyName"
+            />
           </Table>
           <Button
             type={'primary'} onClick={this.onClickFinish} size={'middle'} style={{

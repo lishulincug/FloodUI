@@ -109,37 +109,37 @@ export class EventShowComponent extends React.Component {
   }
 
   componentDidMount() {
-    this.interval = setInterval(() => fetch('http://www.myflood.com/getEventStatus', {
-      method: 'POST',
-      credentials: 'include',
-      headers:
-      {
-        Accept: 'application/json',
-        'Content-Type': 'application/json; charset=utf-8',
-      },
-      body: this.props.eventID,
-    }).then((response) => {
-      if (response.status >= 200 && response.status < 300) {
-        return response.json();
-      } else {
-        const error = new Error(response.statusText);
-        error.response = response;
-        throw error;
-      }
-    },
-    ).then((data) => {
-      if (data.flag) {
-        this.setState({
-          activeServiceStatus: data.object,
-        });
-      } else {
-        const path = {
-          pathname: '/error',
-          query: data.message,
-        };
-        this.context.router.history.push(path);
-      }
-    }), 1000);
+    // this.interval = setInterval(() => fetch('http://www.myflood.com/getEventStatus', {
+    //   method: 'POST',
+    //   credentials: 'include',
+    //   headers:
+    //   {
+    //     Accept: 'application/json',
+    //     'Content-Type': 'application/json; charset=utf-8',
+    //   },
+    //   body: this.props.eventID,
+    // }).then((response) => {
+    //   if (response.status >= 200 && response.status < 300) {
+    //     return response.json();
+    //   } else {
+    //     const error = new Error(response.statusText);
+    //     error.response = response;
+    //     throw error;
+    //   }
+    // },
+    // ).then((data) => {
+    //   if (data.flag) {
+    //     this.setState({
+    //       activeServiceStatus: data.object,
+    //     });
+    //   } else {
+    //     const path = {
+    //       pathname: '/error',
+    //       query: data.message,
+    //     };
+    //     this.context.router.history.push(path);
+    //   }
+    // }), 1000);
     // this.showChart();
     // 获取传感器的基本信息
     fetch('http://www.myflood.com/getEventBaseData', {
@@ -231,7 +231,7 @@ export class EventShowComponent extends React.Component {
   //   });
   // }
   showChart = () => {
-    clearInterval(this.interval);
+    // clearInterval(this.interval);
     fetch('http://www.myflood.com/getEventDataJson', {
       method: 'POST',
       credentials: 'include',
@@ -292,7 +292,7 @@ export class EventShowComponent extends React.Component {
           // 'Access-Control-Allow-Credentials': 'true',
         'Content-Type': 'application/json; charset=utf-8',
       },
-      body: JSON.stringify({ eventID: this.props.eventID, sensorID, propertyID }),
+      body: JSON.stringify({ eventID: this.props.eventID,sensorID:sensorID,propertyID:propertyID }),
     }).then((response) => {
       if (response.status >= 200 && response.status < 300) {
         return response.json();
@@ -303,7 +303,7 @@ export class EventShowComponent extends React.Component {
       }
     },
     ).then((data) => {
-      !data.flag ? this.setState({
+      data.flag ? this.setState({
         chartconfig: {
           chart: {
             zoomType: 'x',
@@ -313,6 +313,9 @@ export class EventShowComponent extends React.Component {
           },
           subtitle: {
             text: '异常事件',
+          },
+          plotOptions:{
+            series:{turboThreshold:100000}
           },
           xAxis: {
             type: 'datetime',
@@ -325,7 +328,6 @@ export class EventShowComponent extends React.Component {
           series: eval(`(${data.object})`),
         },
       }) : null;
-      alert('测试');
     }).catch((error) => {
       alert(error.toString());
     });
@@ -390,7 +392,7 @@ export class EventShowComponent extends React.Component {
           <Tabs defaultActiveKey="1" style={{ height: 400 }} type="card">
             <TabPane tab={<span><Icon type="global" />洪涝事件传感器分布图</span>} key="1">
               <Layout>
-                <Content style={{ minHeight: 410 }}>
+                <Content style={{ minHeight: 1000 }}>
                   <div style={{ height: '400px' }}>
                     <Map center={this.state.center} plugins={['ToolBar']} >
                       <Markers
@@ -480,7 +482,7 @@ export class EventShowComponent extends React.Component {
                     <Column title="查看数据" key="propertyID" render={this.operator} />
                   </Table>
                 </Sider>
-                <Content style={{ minHeight: 410 }}>
+                <Content style={{ minHeight: 1000 }}>
                   <div style={{ height: '400px', width: '100%' }}>
                     <ReactHighcharts config={this.state.chartconfig} />
                   </div>

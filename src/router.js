@@ -1,5 +1,5 @@
 import React from 'react';
-import { Router, Route, Switch } from 'dva/router';
+import {Router, Route, Switch} from 'dva/router';
 import UserCenterPage from './routes/UserCenterPage';
 import NoMatchPage from './routes/NoMatchPage';
 import SendParamPage from './routes/SendParamPage';
@@ -11,28 +11,30 @@ import TabsPage from './routes/TabTestPage';
 import LoginPage from './routes/LoginPage';
 import SelectSensorPage from './routes/SelectSensorPage';
 import SelectSensorPropertyPage from './routes/SelectSensorPropertyPage'
+import UserEventCenterPage from './routes/UserEventCenter';
 
-function RouterConfig({ history }) {
+function RouterConfig({history}) {
   return (
     <Router history={history}>
       <div>
-      <Switch>
-        <Route path="/" exact component={UserCenterPage} />
-        <Route path="/user" exact component={UserCenterPage} />
-        <Route path="/access" exact component={SensorAccessPage} />
-        <Route path="/send" exact component={SendParamPage} />
-        <Route path="/subscribe" exact component={EventSubScribeMangerPage} />
-        <Route path="/show/:eventID" exact component={EventShowPage} />
-        <Route path="/evaluate" exact component={EvaluateDisasterPage} />
-        <Route path="/tab" exact component={TabsPage} />
-        <Route path="/login" exact component={LoginPage} />
-        <Route path="/sensor" exact component={SelectSensorPage} />
-        <Route path="/property" exact component={SelectSensorPropertyPage} />
-        <Route path="/*" exact component={NoMatchPage} />
-      </Switch>
+        <Switch>
+          <Route path="/" exact component={UserCenterPage}/>
+          <Route path="/user" exact component={UserCenterPage}/>
+          <Route path="/access" exact component={SensorAccessPage}/>
+          <Route path="/send" exact component={SendParamPage}/>
+          <Route path="/subscribe" exact component={EventSubScribeMangerPage}/>
+          <Route path="/show/:eventID" exact component={EventShowPage}/>
+          <Route path="/evaluate" exact component={EvaluateDisasterPage}/>
+          <Route path="/tab" exact component={TabsPage}/>
+          <Route path="/login" exact component={LoginPage}/>
+          <Route path="/sensor" exact component={SelectSensorPage}/>
+          <Route path="/property" exact component={SelectSensorPropertyPage}/>
+          <Route path="/manage" exact component={UserEventCenterPage}/>
+          <Route path="/*" exact component={NoMatchPage}/>
+        </Switch>
       </div>
     </Router>
-  );
+);
 }
 
 export default RouterConfig;

@@ -1,19 +1,19 @@
 import React from 'react';
 import { Layout, Menu } from 'antd';
 import { Link } from 'dva/router';
-import { EventShowComponent } from '../components/EventShowComponent';
+import { UserEventCenterComponent } from '../components/UserEventCenterComponent';
 
 
 const { Header, Content, Footer } = Layout;
 
-export default class EventSubscribeMangerPage extends React.Component {
+export default class UserEventCenter extends React.Component {
   state={
     random: 12,
     username:null,
   }
   constructor(props) {
     super(props);
-  // alert(this.props.match.params.eventID);
+    // alert(this.props.match.params.eventID);
   }
   componentDidMount() {
     // this.runPolling();
@@ -76,14 +76,6 @@ export default class EventSubscribeMangerPage extends React.Component {
   }
 
   render() {
-    const path = {
-      pathname: '/subscribe',
-      query: { dataset: { flag: false,
-        sensorList: [{ sensorID: 'sensor1', propertyID: 'property1' },
-          { sensorID: 'sensor1', propertyID: 'property1' }] },
-        event: { flag: false, eventID: 'event1', params: [0, 1, 2, 3] },
-        email: { flag: false, address: 'yuansaii@qq.com' } },
-    };
     return (
       <Layout>
         <Header style={{ height: '34px' }}>
@@ -97,7 +89,7 @@ export default class EventSubscribeMangerPage extends React.Component {
           >
             <Menu.Item key="0"><Link to="/">首页</Link></Menu.Item>
             <Menu.Item key="1"><Link to="/access">传感器观测接入</Link></Menu.Item>
-            <Menu.Item key="2"><Link to={path}>洪涝事件订阅</Link></Menu.Item>
+            <Menu.Item key="2"><Link to="/subscribe">洪涝事件订阅</Link></Menu.Item>
             <Menu.Item key="3"><Link to="/manage">洪涝事件管理</Link></Menu.Item>
             <Menu.Item key="4" style={{ float: 'right' }}>{this.state.username==null?<Link to="/login">登录</Link>:`尊敬的${this.state.username}，您好！`}</Menu.Item>
           </Menu>
@@ -105,7 +97,7 @@ export default class EventSubscribeMangerPage extends React.Component {
         <Layout>
           <Content style={{ margin: '12px 0px 0px 12px', padding: 0, background: '#fff', minHeight: 1000 }}>
             <div id="num" />
-            <EventShowComponent eventID={this.props.match.params.eventID} />
+            <UserEventCenterComponent/>
           </Content>
           <Footer style={{ textAlign: 'center' }}>
             武汉大学陈能成团队SensorWeb小组 ©2017 Created by Yuan Sai

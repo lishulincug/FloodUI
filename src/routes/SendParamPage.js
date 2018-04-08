@@ -9,7 +9,7 @@ export default class SendParamPage extends React.Component {
   }
   render() {
     return (
-      <div style={{ height: '100px' }}> {this.props.location.query.name}</div>
+       <TabComponent/>
 
     );
   }

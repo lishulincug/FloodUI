@@ -166,7 +166,7 @@ export class DisasterComponent extends React.Component {
               </Modal>
             </div>
           </Sider>
-          <Content style={{ margin: '0px 0px 0px 12px', padding: 0, background: '#fff', minHeight: 410 }}>
+          <Content style={{ margin: '0px 0px 0px 12px', padding: 0, background: '#fff', minHeight: 1000 }}>
             <Table dataSource={data}>
               <Column
                 title="编号"
