@@ -180,7 +180,7 @@ export class SelectSensorPropertyComponent extends React.Component {
               width: '100%',
               border: '1px',
             }}
-          >完成传感器选择</Button>
+          >完成预测属性选择</Button>
         </Sider>
         <Content style={{ minHeight: 1000 }}>
           <div style={{ height: '1000px', width: '100%' }}>

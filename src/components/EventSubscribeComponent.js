@@ -1,7 +1,7 @@
 import React from 'react';
-import { Steps, Button, message,Row,Col, Input, Table } from 'antd';
+import {Steps, Button, message, Row, Col, Input, Table} from 'antd';
 import styles from './EventSubscribeComponent.css';
-import { Link } from 'dva/router';
+import {Link} from 'dva/router';
 import fetch from 'dva/fetch';
 
 const Step = Steps.Step;
@@ -26,19 +26,23 @@ export class EventSubscribeComponent extends React.Component {
       current: 0,
       stepsStatus: null,
       eventOtherName: '',
+      learningRate:0.01,
+      maxIterations:50000,
+      maxError:0.000001,
     };
   }
+
   componentDidMount() {
     // Fetch 获取存储于Session中的Json数据
-    fetch('http://www.myflood.com/getSubScribeJson', { method: 'GET', credentials: 'include' }).then((response) => {
-      if (response.status >= 200 && response.status < 300) {
-        return response.json();
-      } else {
-        const error = new Error(response.statusText);
-        error.response = response;
-        throw error;
-      }
-    },
+    fetch('http://www.myflood.com/getSubScribeJson', {method: 'GET', credentials: 'include'}).then((response) => {
+        if (response.status >= 200 && response.status < 300) {
+          return response.json();
+        } else {
+          const error = new Error(response.statusText);
+          error.response = response;
+          throw error;
+        }
+      },
     ).then((data) => {
       this.setState({
         stepsStatus: data,
@@ -47,30 +51,47 @@ export class EventSubscribeComponent extends React.Component {
       return error;
     });
   }
-  changeEmail=(e) => {
+
+  changeEmail = (e) => {
     this.setState({
       email: e.target.value,
     });
   }
-  changeEventName=(e) => {
+  changeEventName = (e) => {
     this.setState({
       eventOtherName: e.target.value,
     });
   }
-  createContent=() => {
+  changeLearningRate=(e)=>{
+    this.setState({
+      learningRate: e.target.value,
+    });
+  }
+  changeMaxIterations=(e)=>{
+    this.setState({
+      maxIterations: e.target.value,
+    });
+  }
+  changeMaxError=(e)=>{
+    this.setState({
+      maxError: e.target.value,
+    });
+  }
+  createContent = () => {
     const sensorData = this.state.stepsStatus.dataset.sensorList;
     if (this.state.current == 0) {
       if (this.state.stepsStatus.dataset.flag) {
         return (
           <div>
-            <h2 style={{ 'text-align': 'center' }}>已选择的传感器数据表</h2>
-            <br />
-            <Table dataSource={sensorData} pagination={{ defaultPageSize: 10 }}>
-              <Column dataIndex="sensorID" title="传感器ID" />
-              <Column dataIndex="sensorName" title="传感器名称" />
+            <h2 style={{'text-align': 'center'}}>已选择的传感器数据表</h2>
+            <br/>
+            <Table dataSource={sensorData} pagination={{defaultPageSize: 10}}>
+              <Column dataIndex="sensorID" title="传感器ID"/>
+              <Column dataIndex="sensorName" title="传感器名称"/>
             </Table>
-            <br />
-            <div style={{ 'padding-right': '5px' }}>重新选择传感器：<Button type={'primary'}><Link to="/sensor">进入传感器选择页面</Link></Button></div>
+            <br/>
+            <div style={{'padding-right': '5px'}}>重新选择传感器：<Button type={'primary'}><Link
+              to="/sensor">进入传感器选择页面</Link></Button></div>
           </div>);
       } else {
         return (<div>进入选择水文传感器界面选择事件的数据集：<Button type={'primary'}><Link to="/sensor">进入传感器选择页面</Link></Button></div>);
@@ -78,39 +99,74 @@ export class EventSubscribeComponent extends React.Component {
     }
     if (this.state.current == 1) {
       if (this.state.stepsStatus.event.flag) {
-        return (<div><h2>事件ID:{this.state.stepsStatus.event.eventID}</h2><br />
+        return (<div><h2>事件ID:{this.state.stepsStatus.event.eventID}</h2><br/>
           <label>准备阶段时间窗口：</label>{0}
         </div>);
       } else {
-        return (<div>进入选择洪涝事件过程信息模型参数设置页面：<Button type={'primary'}><a href="http://www.myflood.com/simpleSubscribeEvnt">进入参数设置页面</a></Button></div>);
+        return (<div>进入选择洪涝事件过程信息模型参数设置页面：<Button type={'primary'}><a href="http://www.myflood.com/simpleSubscribeEvnt">进入参数设置页面</a></Button>
+        </div>);
       }
     }
     if (this.state.current == 2) {
-      if(!this.state.stepsStatus.service.flag) {
+      if (!this.state.stepsStatus.service.flag) {
         return (<div><Row>
-          <Col span={4}>1.设置邮箱:</Col>
-          <Col span={5}><Input style={{width: '100%'}} placeholder="设置事件监听邮箱" value={this.state.email} onChange={this.changeEmail}/></Col>
-          <Col span={2}/>
-          <Col span={4}>2.添加事件用户自定义名称：</Col>
-          <Col span={5}> <Input style={{width: '100%'}} placeholder="设置事件别名" value={this.state.eventOtherName}
+          <Col span={3}>1.设置邮箱:</Col>
+          <Col span={4}><Input style={{width: '100%'}} placeholder="设置事件监听邮箱" value={this.state.email}
+                               onChange={this.changeEmail}/></Col>
+          <Col span={1}/>
+          <Col span={3}>2.添加事件用户自定义名称：</Col>
+          <Col span={4}> <Input style={{width: '100%'}} placeholder="设置事件别名" value={this.state.eventOtherName}
                                 onChange={this.changeEventName}/></Col>
         </Row>
           <br/>
+          <hr/>
+          <br/>
           <Row>
-            <Col span={4}>3.选择水位预测观测属性：</Col>
-            <Col span={5}><Button type={'primary'} style={{width: '100%'}}><Link to="/property">属性选择界面</Link></Button></Col>
+            <Col span={3}>3.设置BP神经网络学习速率:</Col>
+            <Col span={4}><Input style={{width: '100%'}} placeholder="学习速率默认为0.01" value={this.state.learningRate}
+                                 onChange={this.changeLearningRate}/></Col>
+            <Col span={1}/>
+            <Col span={3}>4.设置BP神经网络迭代次数上限：</Col>
+            <Col span={4}> <Input style={{width: '100%'}} placeholder="迭代上限默认为50000" value={this.state.maxIterations}
+                                  onChange={this.changeMaxIterations}/></Col>
+            <Col span={1}/>
+            <Col span={3}>5.设置BP神经网络最大误差：</Col>
+            <Col span={4}> <Input style={{width: '100%'}} placeholder="最大误差默认为0.00001" value={this.state.maxError}
+                                  onChange={this.changeMaxError}/></Col>
+          </Row>
+          <br/>
+          <Row>
+            <Col span={3}>6.选择水位预测观测属性：</Col>
+            <Col span={4}><Button type={'primary'} style={{width: '100%'}}><Link
+              to="/property">属性选择界面</Link></Button></Col>
           </Row>
         </div>);
-      }else {
+      } else {
         return <div><Row>
-          <Col span={4}>1.设置邮箱:</Col>
-          <Col span={5}><Input style={{width: '100%'}} placeholder="设置事件监听邮箱" value={this.state.email}
+          <Col span={3}>1.设置邮箱:</Col>
+          <Col span={4}><Input style={{width: '100%'}} placeholder="设置事件监听邮箱" value={this.state.email}
                                onChange={this.changeEmail}/></Col>
-          <Col span={2}/>
-          <Col span={4}>2.添加事件用户自定义名称：</Col>
-          <Col span={5}> <Input style={{width: '100%'}} placeholder="设置事件别名" value={this.state.eventOtherName}
+          <Col span={1}/>
+          <Col span={3}>2.添加事件用户自定义名称：</Col>
+          <Col span={4}> <Input style={{width: '100%'}} placeholder="设置事件别名" value={this.state.eventOtherName}
                                 onChange={this.changeEventName}/></Col>
         </Row>
+          <br/>
+          <hr/>
+          <br/>
+          <Row>
+            <Col span={3}>3.设置BP神经网络学习速率:</Col>
+            <Col span={4}><Input style={{width: '100%'}} placeholder="学习速率默认为0.01" value={this.state.learningRate}
+                                 onChange={this.changeLearningRate}/></Col>
+            <Col span={1}/>
+            <Col span={3}>4.设置BP神经网络迭代次数上限：</Col>
+            <Col span={4}> <Input style={{width: '100%'}} placeholder="迭代上限默认为50000" value={this.state.maxIterations}
+                                  onChange={this.changeMaxIterations}/></Col>
+            <Col span={1}/>
+            <Col span={3}>5.设置BP神经网络最大误差：</Col>
+            <Col span={4}> <Input style={{width: '100%'}} placeholder="最大误差默认为0.00001" value={this.state.maxError}
+                                  onChange={this.changeMaxError}/></Col>
+          </Row>
           <br/>
           <Table dataSource={this.state.stepsStatus.service.selectedProperty} pagination={{defaultPageSize: 10}}>
             <Column dataIndex="sensorID" title="传感器ID"/>
@@ -122,36 +178,46 @@ export class EventSubscribeComponent extends React.Component {
       }
     }
   }
+
   // 以Session作为状态存储的对象
   next() {
     const current = this.state.current + 1;
-    this.setState({ current });
+    this.setState({current});
   }
+
   prev() {
     const current = this.state.current - 1;
-    this.setState({ current });
+    this.setState({current});
   }
+
   submitEvent() {
     if (this.state.stepsStatus == null || !this.state.stepsStatus.dataset.flag || !this.state.stepsStatus.event.flag) alert('不行');
     // 上传配置参数数据，以及用户定义别名及邮箱
     var propertys = this.state.stepsStatus.service.selectedProperty;
     var propertyIDs = new Array();
-    for (var i=0;i<propertys.length;i++) {
+    for (var i = 0; i < propertys.length; i++) {
       propertyIDs.push(propertys[i].id);
     }
     const subcribeParams = this.state.stepsStatus.event.params;
     subcribeParams.sensorPropertyIDs = propertyIDs;
     subcribeParams.userDefineName = this.state.eventOtherName;
-    subcribeParams.name=this.state.eventOtherName;
+    subcribeParams.name = this.state.eventOtherName;
     subcribeParams.email = this.state.email;
+    subcribeParams.learningRate = this.state.learningRate;
+    subcribeParams.maxIterations = this.state.maxIterations;
+    subcribeParams.maxError = this.state.maxError;
 
-     alert(JSON.stringify(subcribeParams));
-    fetch('http://www.myflood.com/subscribeWithSession', { method: 'POST',
+    alert(JSON.stringify(subcribeParams));
+    fetch('http://www.myflood.com/subscribeWithSession', {
+      method: 'POST',
       credentials: 'include',
       headers:
-      { Accept: 'application/json',
-        'Content-Type': 'application/json; charset=utf-8' },
-      body: JSON.stringify(subcribeParams) }).then((response) => {
+        {
+          Accept: 'application/json',
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+      body: JSON.stringify(subcribeParams)
+    }).then((response) => {
         if (response.status >= 200 && response.status < 300) {
           return response.json();
         } else {
@@ -166,37 +232,59 @@ export class EventSubscribeComponent extends React.Component {
       throw error;
     });
   }
+
   render() {
     const steps = [{
       title: '选择水文数据集',
       content: <div>进入选择水文传感器界面选择事件的数据集：<Button type={'primary'}><Link to="/sensor">进入传感器选择页面</Link></Button></div>,
     }, {
       title: '构建过程信息订阅模型',
-      content: <div>进入选择洪涝事件过程信息模型参数设置页面：<Button type={'primary'}><a href="http://www.myflood.com/simpleSubscribeEvnt">进入参数设置页面</a></Button></div>,
+      content: <div>进入选择洪涝事件过程信息模型参数设置页面：<Button type={'primary'}><a href="http://www.myflood.com/simpleSubscribeEvnt">进入参数设置页面</a></Button>
+      </div>,
     }, {
-      title: '设置服务配置参数',
-      content: <div><Row>
-        <Col span={4}>1.设置邮箱:</Col>
-        <Col span={5}><Input style={{width: '100%'}} placeholder="设置事件监听邮箱" value={this.state.email} onChange={this.changeEmail}/></Col>
-        <Col span={2}/>
-        <Col span={4}>2.添加事件用户自定义名称：</Col>
-        <Col span={5}> <Input style={{width: '100%'}} placeholder="设置事件别名" value={this.state.eventOtherName}
-                              onChange={this.changeEventName}/></Col>
+      title: '设置洪涝预测模型参数',
+      content: <div>
+        <Row>
+          <Col span={3}>1.设置邮箱:</Col>
+          <Col span={4}><Input style={{width: '100%'}} placeholder="设置事件监听邮箱" value={this.state.email}
+                               onChange={this.changeEmail}/></Col>
+          <Col span={1}/>
+          <Col span={3}>2.添加事件用户自定义名称：</Col>
+          <Col span={4}> <Input style={{width: '100%'}} placeholder="设置事件别名" value={this.state.eventOtherName}
+                                onChange={this.changeEventName}/></Col>
+        </Row>
+        <br/>
+        <hr/>
+        <br/>
+        <Row>
+          <Col span={3}>3.设置BP神经网络学习速率:</Col>
+          <Col span={4}><Input style={{width: '100%'}} placeholder="学习速率默认为0.01" value={this.state.learningRate}
+                               onChange={this.changeLearningRate}/></Col>
+          <Col span={1}/>
+          <Col span={3}>4.设置BP神经网络迭代次数上限：</Col>
+          <Col span={4}> <Input style={{width: '100%'}} placeholder="迭代上限默认为50000" value={this.state.maxIterations}
+                                onChange={this.changeMaxIterations}/></Col>
+          <Col span={1}/>
+          <Col span={3}>5.设置BP神经网络最大误差：</Col>
+          <Col span={4}> <Input style={{width: '100%'}} placeholder="最大误差默认为0.00001" value={this.state.maxError}
+                                onChange={this.changeMaxError}/></Col>
         </Row>
         <br/>
         <Row>
-          <Col span={4}>3.选择水位预测观测属性：</Col>
-          <Col span={5}><Button type={'primary'} style={{width: '100%'}}><Link to="/property">属性选择界面</Link></Button></Col>
+          <Col span={3}>6.选择水位预测观测属性：</Col>
+          <Col span={4}><Button type={'primary'} style={{width: '100%'}}><Link
+            to="/property">属性选择界面</Link></Button></Col>
         </Row>
       </div>,
     }];
-    const { current } = this.state;
+    const {current} = this.state;
     return (
       <div>
         <Steps current={current}>
-          {steps.map(item => <Step key={item.title} title={item.title} />)}
+          {steps.map(item => <Step key={item.title} title={item.title}/>)}
         </Steps>
-        <div className={styles.content}>{this.state.stepsStatus == null ? steps[this.state.current].content : this.createContent()}</div>
+        <div
+          className={styles.content}>{this.state.stepsStatus == null ? steps[this.state.current].content : this.createContent()}</div>
         <div className={styles.action}>
           {
             this.state.current < steps.length - 1
@@ -211,7 +299,7 @@ export class EventSubscribeComponent extends React.Component {
           {
             this.state.current > 0
             &&
-            <Button style={{ marginLeft: 8 }} onClick={() => this.prev()}>
+            <Button style={{marginLeft: 8}} onClick={() => this.prev()}>
               Previous
             </Button>
           }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { TabComponent } from '../components/TabComponent';
+import {TabComponent} from '../components/TabComponent';
+import bpimg from '../assets/BP.png';
 
 export default class SendParamPage extends React.Component {
 
@@ -7,9 +8,10 @@ export default class SendParamPage extends React.Component {
     super(props);
     // const data = this.props.location.query;
   }
+
   render() {
     return (
-       <TabComponent/>
+      <img src={bpimg}/>
 
     );
   }
