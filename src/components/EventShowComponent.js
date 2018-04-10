@@ -1,5 +1,5 @@
 import React from 'react';
-import {Row, Col, Icon, Layout, Button, Tabs, Table, Tree, Card,Tag ,Carousel} from 'antd';
+import {Row, Col, Icon, Layout, Button, Tabs, Table, Tree, Card,Tag ,Timeline} from 'antd';
 import {Map, Markers, InfoWindow} from 'react-amap';
 import fetch from 'dva/fetch';
 import PropTypes from 'prop-types';
@@ -20,6 +20,11 @@ const {Sider, Content} = Layout;
 const {Column} = Table;
 const TabPane = Tabs.TabPane;
 const ReactHighcharts = require('react-highcharts');
+ReactHighcharts.Highcharts.setOptions({
+  global:{
+    useUTC:false
+  }
+});
 const Highcharts = require('highcharts');
 
 // const chartconfig = {
@@ -66,7 +71,7 @@ export class EventShowComponent extends React.Component {
     currentMarker: null,
     visible: true,
     selectedRowKeys: [],
-    center: {longtitude: 120.1, latitude: 30.1},
+    center: {longitude: 120.1, latitude: 30.1},
     activeServiceStatus: '无事件',
     chartconfig: {
       chart: {
@@ -90,6 +95,7 @@ export class EventShowComponent extends React.Component {
     },
     currentMessage:null,
     predictConfig:null,
+    statisticMessage:null
   };
 
   constructor(props, context) {
@@ -171,10 +177,20 @@ export class EventShowComponent extends React.Component {
       },
     ).then((data) => {
       if (data.flag) {
-        // 构建一个数组
+        // 构建一个数组，用于存储所有的传感器数据
+        var predictSensors = data.object.dataset.sensors;
+        var statisticSensors=data.object.sensors;
+        var sensors = new Array();
+        for(var i=0;i<predictSensors.length;i++) {
+          sensors.push(predictSensors[i]);
+        }
+        for (var i=0;i<statisticSensors.length;i++) {
+          sensors.push(statisticSensors[i]);
+        }
+        console.log(sensors);
         this.setState({
           floodResult: data.object,
-          sensors: data.object.sensors,
+          sensors: sensors,
           propertys: data.object.propertys,
           center: {
             longitude: data.object.dataset.diagnosisSensor.lon,
@@ -389,6 +405,43 @@ export class EventShowComponent extends React.Component {
       }
     }
   }
+  predictSelect=(selectedRowKeys)=>{
+    if(selectedRowKeys.length<=0) return;
+
+    console.log(selectedRowKeys);
+    var keys = selectedRowKeys[0].split("-");
+    if (keys.length<=2) return;
+    this.setState({
+      center: {
+        longitude: this.state.floodResult.dataset.sensors[parseInt(keys[2])].lon,
+        latitude: this.state.floodResult.dataset.sensors[parseInt(keys[2])].lat
+      },
+    })
+  }
+  predictSensorTreeShow=()=>{
+    if (this.state.floodResult==null) return ( <TreeNode title="洪涝过程预测模型传感器属性" key="0-0"><TreeNode key="0-0-1" title="没有传感器属性"></TreeNode></TreeNode>);
+    else {
+      //计算key值
+      var predictSensors = this.state.floodResult.dataset.sensors;
+      for(var i=0;i<predictSensors.length;i++) {
+        var key="0-0-" + i;
+        predictSensors[i].key = "0-0-" + i;
+        var properties=predictSensors[i].observedProperties;
+        for (var j=0;j<properties.length;j++) {
+          properties[j].key = key + "-" + j;
+        }
+      }
+      console.log(predictSensors);
+      return<TreeNode title="洪涝过程预测模型传感器属性" key="0-0">
+        {predictSensors.map((sensor)=>{
+         return <TreeNode key={sensor.key} title={sensor.sensorName}>{sensor.observedProperties.map((property)=>{
+           return <TreeNode key={property.key} title={property.propertyName}></TreeNode>
+          })}</TreeNode>
+        })}
+      </TreeNode>;
+    }
+  }
+
   alertDetail=(text, record, index)=>{
     return(
     <Button type={'primary'} onClick={()=>{
@@ -406,6 +459,13 @@ export class EventShowComponent extends React.Component {
         })
       }}>查看详情</Button>);
   }
+  statisticDetail=(text, record, index)=>{
+    return ( <Button type={'primary'} onClick={() => {
+      this.setState({
+        statisticMessage: record
+      })
+    }}>查看详情</Button>);
+  }
   operator = (text, record, index) => {
     return (<Button
       type={'primary'} size={'small'} onClick={() => {
@@ -414,7 +474,19 @@ export class EventShowComponent extends React.Component {
     }
     >加载数据</Button>);
   }
+drawTimeLine=()=>{
+    return (
+      <Timeline>
+        <Timeline.Item color='#91e8e1'>{this.state.statisticMessage.diagnosisStartTime} 洪涝事件处于诊断阶段</Timeline.Item>
+        <Timeline.Item color='#f7a35c'>{this.state.statisticMessage.prepareStartTime}洪涝事件进入准备阶段</Timeline.Item>
+        <Timeline.Item color='#f15c80'>{this.state.statisticMessage.responseStartTime}洪涝事件进入响应阶段</Timeline.Item>
+        <Timeline.Item color='blue'>{this.state.statisticMessage.maxWaterLevelTime}当前洪涝事件达到水位最大值{this.state.statisticMessage.maxWaterLevel}m</Timeline.Item>
+        <Timeline.Item color='#90ed7d'>{this.state.statisticMessage.recoveryStartTime}洪涝事件进入恢复阶段</Timeline.Item>
+        <Timeline.Item color='#91e8e1'>{this.state.statisticMessage.recoveryEndTime}洪涝事件结束，水位恢复到正常，事件处于诊断阶段</Timeline.Item>
+      </Timeline>
 
+    )
+}
   render() {
     // const config = {
     //   xAxis: {
@@ -475,7 +547,7 @@ export class EventShowComponent extends React.Component {
                 <Sider
                   trigger={null}
                   width={200}
-                  style={{backgroundColor: 'white'}}
+                  style={{backgroundColor: 'white',overflow:'auto'}}
                 >
                   {/* {this.state.floodResult!=null ? alert(JSON.parse(this.state.floodResult)) : null}*/}
                   <Tree
@@ -483,7 +555,7 @@ export class EventShowComponent extends React.Component {
                     defaultSelectedKeys={['0-0-0', '0-0-1']}
                     onSelect={this.onSelect}
                   >
-                    <TreeNode title="洪涝事件传感器" key="0-0">
+                    <TreeNode title="洪涝过程统计模型传感器属性" key="0-0">
                       <TreeNode title="诊断阶段" key="0-0-0">
                         <TreeNode
                           title={this.state.floodResult != null ? `${this.state.floodResult.dataset.diagnosisSensor.sensorName}` : '没有数据'}
@@ -522,56 +594,8 @@ export class EventShowComponent extends React.Component {
                       </TreeNode>
                     </TreeNode>
                   </Tree>
-                </Sider>
-                <Sider
-                  trigger={null}
-                  width={200}
-                  style={{backgroundColor: 'white'}}
-                >
-                  {/* {this.state.floodResult!=null ? alert(JSON.parse(this.state.floodResult)) : null}*/}
-                  <Tree
-                    defaultExpandedKeys={['0-0']}
-                    defaultSelectedKeys={['0-0-0', '0-0-1']}
-                    onSelect={this.onSelect}
-                  >
-                    <TreeNode title="洪涝事件传感器" key="0-0">
-                      <TreeNode title="诊断阶段" key="0-0-0">
-                        <TreeNode
-                          title={this.state.floodResult != null ? `${this.state.floodResult.dataset.diagnosisSensor.sensorName}` : '没有数据'}
-                          key="0-0-0-0">
-                          {this.state.floodResult != null ?
-                            <TreeNode title={this.state.floodResult.dataset.diagnosisProperty.propertyName}
-                                      key="0-0-0-0-0"/> : <div/>}
-                        </TreeNode>
-                      </TreeNode>
-                      <TreeNode title="准备阶段" key="0-0-1">
-                        <TreeNode
-                          title={this.state.floodResult != null ? `${this.state.floodResult.dataset.prepareSensor.sensorName}` : '没有数据'}
-                          key="0-0-1-0">
-                          {this.state.floodResult != null ?
-                            <TreeNode title={this.state.floodResult.dataset.prepareProperty.propertyName}
-                                      key="0-0-1-0-0"/> : <div/>}
-                        </TreeNode>
-                      </TreeNode>
-                      <TreeNode title="响应阶段" key="0-0-2">
-                        <TreeNode
-                          title={this.state.floodResult != null ? `${this.state.floodResult.dataset.responseSensor.sensorName}` : '没有数据'}
-                          key="0-0-2-0">
-                          {this.state.floodResult != null ?
-                            <TreeNode title={this.state.floodResult.dataset.responseProperty.propertyName}
-                                      key="0-0-2-0-0"/> : <div/>}
-                        </TreeNode>
-                      </TreeNode>
-                      <TreeNode title="恢复阶段" key="0-0-3">
-                        <TreeNode
-                          title={this.state.floodResult != null ? `${this.state.floodResult.dataset.recoverySensor.sensorName}` : '没有数据'}
-                          key="0-0-3-0">
-                          {this.state.floodResult != null ?
-                            <TreeNode title={this.state.floodResult.dataset.recoveryProperty.propertyName}
-                                      key="0-0-3-0-0"/> : <div/>}
-                        </TreeNode>
-                      </TreeNode>
-                    </TreeNode>
+                  <Tree defaultExpandedKeys={['0-0']} onSelect={this.predictSelect}>
+                    {this.predictSensorTreeShow()}
                   </Tree>
                 </Sider>
               </Layout>
@@ -618,12 +642,12 @@ export class EventShowComponent extends React.Component {
               <hr/>
               <br/>
               <Layout>
-                <Content style={{minHeight: 450,backgroundColor:"white"}}>
+                <Content style={{minHeight: 480,backgroundColor:"white"}}>
                   <Tabs
                     defaultActiveKey="1"
                     tabPosition="left"
                     type="card"
-                    style={{ height: 450}}
+                    style={{ height: 480}}
                   >
                     <TabPane tab="洪涝预警记录" key="1">
                       <Row>
@@ -681,11 +705,55 @@ export class EventShowComponent extends React.Component {
                       </Col>
                       <Col span={1}/>
                       <Col span={8}>
-                        <h2>当前洪涝预警详细内容</h2>
-                        <div style={{height:'450px',width:'100%'}}><ReactHighcharts config={this.state.predictConfig}/></div>
+                        <div style={{height:'480px',width:'100%'}}><ReactHighcharts config={this.state.predictConfig}/></div>
                       </Col>
                     </Row></TabPane>
-                    <TabPane tab="洪涝统计记录" key="3">Content of tab 3</TabPane>
+                    <TabPane tab="洪涝统计记录" key="3">
+                      <Row>
+                        <Col span={13}>
+                          <Table dataSource={this.state.floodResult==null?null:this.state.floodResult.results.statistic} pagination={{defaultPageSize: 6}}>
+                            <Column
+                              title="编号"
+                              dataIndex="key"
+                            />
+                            <Column
+                              title="洪涝事件开始时间"
+                              dataIndex="startTime"
+                            />
+                            <Column
+                              title="洪涝事件结束时间"
+                              dataIndex="endTime"
+                            />
+                            <Column
+                              title="准备阶段持续时长(小时)"
+                              dataIndex="prepareDuration"
+                            />
+                            <Column
+                              title="响应阶段持续时长(小时)"
+                              dataIndex="responseDuration"
+                            />
+                            <Column
+                              title="恢复阶段持续时长(小时)"
+                              dataIndex="recoveryDuration"
+                            />
+                            <Column
+                              title="阶段详情"
+                              render={this.statisticDetail}
+                            />
+                          </Table>
+                        </Col>
+                        <Col span={1}/>
+                        <Col span={8}>
+                          <div style={{height:'480px',width:'100%'}}>
+                            {/*绘制时间轴*/}
+                            <br/>
+                            <div style={{width:'100%',textAlign:'center'}}> <h2>洪涝事件过程信息详情</h2></div>
+                            <br/>
+                            {this.state.statisticMessage!=null?this.drawTimeLine():"当前无洪涝事件过程信息！"}
+                          </div>
+                        </Col>
+                      </Row>
+                    </TabPane>
                   </Tabs>
                   {/*<Row>*/}
                     {/*/!*<Col span={7}></Col>*!/*/}
@@ -758,12 +826,14 @@ export class EventShowComponent extends React.Component {
                   <Col span={1}/>
                   <Col span={6}>
                     <Card title="洪涝过程预测模型参数" bordered={false}>
-                      <h4><b>传感器名称：</b>{this.state.floodResult.dataset.recoverySensor.sensorName}</h4>
-                      <h4><b>传感器属性：</b>{this.state.floodResult.dataset.recoveryProperty.propertyName}</h4>
-                      <h4>
-                        <b>阈值：</b>{this.state.floodResult.params.recoveryThreshold}{this.state.floodResult.params.recoveryUnit}
-                      </h4>
-                      <h4><b>重复次数：</b>{this.state.floodResult.params.recoveryRepeatTimes}次</h4>
+                      <h4><b>网络类型：</b>后向反馈神经网络（Back Propagation Network,BP神经网络）</h4>
+                      <h4><b>网络输入节点数：</b>{this.state.floodResult.params.sensorPropertyIDs.length}</h4>
+                      <h4><b>第一层隐含层节点数：</b>{Math.floor(Math.sqrt(this.state.floodResult.params.sensorPropertyIDs.length+1))}</h4>
+                      <h4><b>第二层隐含层节点数：</b>{Math.floor(Math.sqrt(this.state.floodResult.params.sensorPropertyIDs.length+1))+3}</h4>
+                      <h4><b>输出层节点数：</b>1</h4>
+                      <h4><b>学习速率：</b>{this.state.floodResult.params.learningRate}</h4>
+                      <h4><b>迭代次数上限：</b>{this.state.floodResult.params.maxIterations}</h4>
+                      <h4><b>误差上限：</b>{this.state.floodResult.params.maxError}</h4>
                     </Card>
                   </Col>
                 </Row>
